@@ -74,6 +74,15 @@ def value_from_thing(thing, desc, ocol):
         if entity.__table__.name == ocol.table_name:
             prop = mapper.get_property_by_column(ocol.element)
             return getattr(thing, prop.key)
+        elif ocol.table_name in thing.metadata.tables.keys():
+            joined_entity = None
+            for rel in mapper.relationships:
+                if rel.entity.mapped_table.key == ocol.table_name:
+                    joined_entity = getattr(thing, rel.key)
+            try:
+                return getattr(joined_entity, ocol.element.key)
+            except AttributeError:
+                raise ValueError
         else:
             raise ValueError
 
